@@ -15,7 +15,6 @@ function App() {
 
   useEffect(() => {
     setAuthenticated(!!localStorage.getItem("accessToken"));
-    console.log("loop running");
   }, [authenticated, setAuthenticated]);
 
   return (

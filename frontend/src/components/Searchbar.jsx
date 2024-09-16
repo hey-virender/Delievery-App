@@ -51,13 +51,13 @@ const Searchbar = () => {
   };
 
   return (
-    <div className="relative mt-8 w-full bg-slate-700 px-1 bg-opacity-30 rounded-lg">
+    <div className="relative mt-8 w-full bg-slate-700 px-1 bg-opacity-30 rounded-lg md:w-2/3">
       <div className="font-semibold text-lg">
         Let&apos;s find the best food here
       </div>
       <div>
         <input
-          className="w-1/2 h-8 focus:outline-none bg-transparent placeholder:text-black placeholder:font-normal placeholder:text-slate-700 border-b border-gray-400"
+          className="w-1/2 h-8 focus:outline-none bg-transparent  placeholder:font-normal placeholder:text-slate-700 border-b border-gray-400"
           placeholder="Search Now..."
           type="search"
           value={query}

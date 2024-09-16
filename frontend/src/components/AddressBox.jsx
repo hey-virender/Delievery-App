@@ -11,7 +11,10 @@ const AddressBox = ({
       className={`grid grid-cols-3 gap-x-3  rounded-xl p-4 text-white font-semibold capitalize my-1 ${
         selectedAddressIndex == index ? " bg-blue-600" : "bg-slate-700"
       }`}
-      onClick={() => setSelectedAddressIndex(index)}
+      onClick={() => {
+        console.log(index);
+        setSelectedAddressIndex(index);
+      }}
     >
       <h3 className="col-span-3 text-white font-bold text-xl">{`Address ${
         index + 1

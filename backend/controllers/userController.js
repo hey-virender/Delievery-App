@@ -134,7 +134,7 @@ export const deleteAddress = async (req, res) => {
     const { addressIndex } = req.query;
 
     // Check if addressIndex is provided and is a valid number
-    if (typeof addressIndex !== "number" || addressIndex < 0) {
+    if (addressIndex < 0) {
       return res.status(400).json({ message: "Invalid address index" });
     }
 

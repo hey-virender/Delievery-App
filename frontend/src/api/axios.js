@@ -27,11 +27,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check if error status is 401 (Unauthorized) and if the request hasn't been retried
-    if (
-      error.response &&
-      error.response.status === 401 &&
-      !originalRequest._retry
-    ) {
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {

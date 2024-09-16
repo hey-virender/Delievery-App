@@ -28,6 +28,7 @@ const ManageAddresses = () => {
         `/deleteAddress?addressIndex=${selectedAddressIndex}`
       );
       showPopup("message", response.data.message);
+      window.location.reload();
     } catch (e) {
       console.log(e);
       showPopup("error", "Failed to delete address");
@@ -56,7 +57,7 @@ const ManageAddresses = () => {
           </button>
         </div>
         {showAddAddress && (
-          <div className="absolute bg-white">
+          <div className="absolute bg-white w-full h-[90vh]">
             <div className="bg-blue-500 h-[2px] mt-3"></div>
             <AddNewAddress onAddressAdded={handleAddressAdded} />
           </div>

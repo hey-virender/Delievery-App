@@ -23,15 +23,15 @@ const RelatedProducts = ({ product }) => {
     superLargeDesktop: {
       // the naming can be any, depends on you.
       breakpoint: { max: 4000, min: 3000 },
-      items: 5,
+      items: 6,
     },
     desktop: {
       breakpoint: { max: 3000, min: 1024 },
-      items: 3,
+      items: 5,
     },
     tablet: {
       breakpoint: { max: 1024, min: 464 },
-      items: 2,
+      items: 4,
     },
     mobile: {
       breakpoint: { max: 464, min: 0 },
@@ -47,7 +47,7 @@ const RelatedProducts = ({ product }) => {
             key={product._id}
             onClick={() => navigate(`/products/${product._id}`)}
           >
-            <div className="h-16 w-16">
+            <div className="h-16 w-16 sm:h-20 sm:w-20">
               <img
                 className="h-full w-full object-contain"
                 src={product.image}
