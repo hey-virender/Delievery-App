@@ -62,6 +62,7 @@ const Authenticate = () => {
           token: idToken,
           name,
         });
+        console.log(response);
 
         if (response.status == 200) {
           const user = response.data.user;

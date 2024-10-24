@@ -1,8 +1,9 @@
 import axios from "axios";
 import { refreshAccessToken } from "../utils/authUtils";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+console.log(backendUrl);
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000/api", // Replace with your backend base URL
+  baseURL: backendUrl, // Replace with your backend base URL
   headers: {
     "Content-Type": "application/json",
   },
