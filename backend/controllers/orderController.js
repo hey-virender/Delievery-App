@@ -3,6 +3,7 @@ import User from "../models/User.js"; // Add User
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 // Create a Razorpay instance
 const razorpayInstance = new Razorpay({
@@ -11,27 +12,47 @@ const razorpayInstance = new Razorpay({
 });
 
 export const placeSingleProductOrder = async (req, res) => {
-  console.log("PlaceSingleProductOrder");
   try {
     const { productId, quantity, deliveryAddressIndex } = req.body;
-
     const customer = req.userId;
+
+    // Fetch user data
     const user = await User.findById(customer);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if the address index is valid
+    if (!user.addresses[deliveryAddressIndex]) {
+      return res.status(400).json({ message: "Invalid delivery address" });
+    }
+
     const address = user.addresses[deliveryAddressIndex];
+
+    // Fetch product details
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
+
+    // Ensure quantity is valid
+    if (quantity <= 0)
+      return res.status(400).json({ message: "Invalid quantity" });
 
     // Calculate total price
     const totalPrice = product.price * quantity;
 
-    // Step 1: Create a Razorpay order
-    const razorpayOptions = {
-      amount: totalPrice * 100, // Razorpay expects amount in paise (smallest currency unit)
-      currency: "INR",
-      receipt: `receipt_order_${Date.now()}`,
-    };
-
-    const razorpayOrder = await razorpayInstance.orders.create(razorpayOptions);
+    // Step 1: Create a Razorpay order (wrapped in try-catch)
+    let razorpayOrder;
+    try {
+      const razorpayOptions = {
+        amount: totalPrice * 100, // Razorpay expects amount in paise
+        currency: "INR",
+        receipt: `receipt_order_${Date.now()}`,
+      };
+      razorpayOrder = await razorpayInstance.orders.create(razorpayOptions);
+    } catch (error) {
+      return res.status(500).json({
+        message: "Razorpay order creation failed",
+        error: error.message,
+      });
+    }
 
     // Step 2: Create and save the order in your database
     const order = new Order({
@@ -43,10 +64,24 @@ export const placeSingleProductOrder = async (req, res) => {
       razorpayOrderId: razorpayOrder.id, // Store the Razorpay order ID for tracking
     });
 
+    // Add order reference to the user
     user.orders.push(order._id);
 
-    await user.save();
-    await order.save();
+    // Save order and user in a transaction (optional, but recommended for atomicity)
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await user.save({ session });
+      await order.save({ session });
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      return res
+        .status(500)
+        .json({ message: "Failed to save order", error: error.message });
+    } finally {
+      session.endSession();
+    }
 
     // Step 3: Send both backend order details and Razorpay order details
     res.status(201).json({
@@ -56,11 +91,13 @@ export const placeSingleProductOrder = async (req, res) => {
       currency: razorpayOrder.currency,
       user: {
         name: user.name,
-        contact: user.phone,
+        contact: user.phone, // Consider if phone number needs to be returned
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -74,26 +111,44 @@ export const placeCartOrder = async (req, res) => {
     const user = await User.findById(userId).populate("cart.product");
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // Check if the delivery address index is valid
+    const deliveryAddress = user.addresses[deliveryAddressIndex];
+    if (!deliveryAddress) {
+      return res.status(400).json({ message: "Invalid delivery address" });
+    }
+
+    // Check if the cart is empty
+    if (user.cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
     // Prepare order details
     const items = user.cart.map((item) => ({
       product: item.product._id,
       quantity: item.quantity,
     }));
-    const totalPrice = user.cart.reduce(
-      (acc, item) => acc + item.product.price * item.quantity,
-      0
-    );
 
-    const deliveryAddress = user.addresses[deliveryAddressIndex];
+    // Calculate total price and validate product prices
+    const totalPrice = user.cart.reduce((acc, item) => {
+      const productPrice = item.product.price || 0; // Fallback to 0 if price is undefined
+      return acc + productPrice * item.quantity;
+    }, 0);
 
-    // Step 1: Create a Razorpay order
-    const razorpayOptions = {
-      amount: totalPrice * 100, // Razorpay expects amount in paise
-      currency: "INR",
-      receipt: `receipt_order_${Date.now()}`,
-    };
-
-    const razorpayOrder = await razorpayInstance.orders.create(razorpayOptions);
+    // Step 1: Create a Razorpay order (wrapped in try-catch)
+    let razorpayOrder;
+    try {
+      const razorpayOptions = {
+        amount: totalPrice * 100, // Razorpay expects amount in paise
+        currency: "INR",
+        receipt: `receipt_order_${Date.now()}`,
+      };
+      razorpayOrder = await razorpayInstance.orders.create(razorpayOptions);
+    } catch (error) {
+      return res.status(500).json({
+        message: "Razorpay order creation failed",
+        error: error.message,
+      });
+    }
 
     // Step 2: Create and save the order in your database
     const order = new Order({
@@ -105,12 +160,23 @@ export const placeCartOrder = async (req, res) => {
       razorpayOrderId: razorpayOrder.id, // Store the Razorpay order ID for tracking
     });
 
-    await order.save();
-
-    // Step 3: Clear the user's cart
-    user.cart = [];
-    user.orders.push(order._id);
-    await user.save();
+    // Use a transaction for order creation and cart clearing
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await order.save({ session });
+      user.orders.push(order._id);
+      user.cart = [];
+      await user.save({ session });
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      return res
+        .status(500)
+        .json({ message: "Failed to process order", error: error.message });
+    } finally {
+      session.endSession();
+    }
 
     // Step 4: Send both backend order details and Razorpay order details
     res.status(201).json({
@@ -120,10 +186,11 @@ export const placeCartOrder = async (req, res) => {
       currency: razorpayOrder.currency,
       user: {
         name: user.name,
-        contact: user.phone,
+        contact: user.phone, // Be cautious about including sensitive information
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };

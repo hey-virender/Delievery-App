@@ -12,13 +12,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-// initializeAppCheck(app, {
-//   provider: new ReCaptchaV3Provider(
-//     import.meta.env.VITE_FIREBASE_CAPTCHA_SITE_KEY
-//   ),
-//   isTokenAutoRefreshEnabled: true,
-// });
-
 const auth = getAuth(app);
 
 export { auth };

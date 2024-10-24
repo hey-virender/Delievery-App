@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from "../api/axios";
 const OrderDetails = ({ order }) => {
   function formatDate(dateString) {
     // Create a new Date object from the input date string
@@ -28,6 +29,7 @@ const OrderDetails = ({ order }) => {
     // Return the formatted date and time
     return `${day}/${month}/${year}, ${hours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
   }
+
   return (
     <div
       className="border-[2px] border-red-500 my-1 rounded-lg p-1 h-32 overflow-hidden"
@@ -55,11 +57,6 @@ const OrderDetails = ({ order }) => {
             <div>
               <div>Total Price</div> <div>₹{order.totalPrice}</div>
             </div>
-          </section>
-          <section>
-            <button className="bg-red-500 text-white text-sm font-bold px-1  rounded-full ">
-              Cancel Order
-            </button>
           </section>
         </div>
       </div>

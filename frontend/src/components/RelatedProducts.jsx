@@ -18,7 +18,7 @@ const RelatedProducts = ({ product }) => {
       }
     };
     fetchRelatedProducts();
-  }, [product]);
+  }, []);
   const responsive = {
     superLargeDesktop: {
       // the naming can be any, depends on you.

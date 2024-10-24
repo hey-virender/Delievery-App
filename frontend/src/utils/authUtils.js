@@ -7,7 +7,7 @@ export const refreshAccessToken = async () => {
     // Store new access token
     localStorage.setItem("accessToken", accessToken);
   } catch (error) {
-    console.error("Failed to refresh access token:", error);
-    throw error; // handle the error based on your logic (e.g., logout the user)
+    localStorage.removeItem("accessToken");
+    // handle the error based on your logic (e.g., logout the user)
   }
 };

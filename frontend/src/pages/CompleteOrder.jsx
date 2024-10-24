@@ -49,7 +49,7 @@ const CompleteOrder = () => {
     };
 
     fetchData();
-  }, [orderType, product, quantity, showPopup]);
+  }, [orderType]);
 
   const handleAddressAdded = (newAddress) => {
     setAddresses((prevAddresses) => [...prevAddresses, newAddress]);
@@ -71,6 +71,11 @@ const CompleteOrder = () => {
 
   const handleRazorpayPayment = async () => {
     const res = await loadRazorpayScript();
+    if (addresses.length < 0) {
+      console.error("No address");
+      showPopup("error", "Please add an address to proceed with payment");
+      return;
+    }
 
     if (!res) {
       showPopup("error", "Razorpay SDK failed to load. Please try again.");
@@ -133,10 +138,7 @@ const CompleteOrder = () => {
             navigate("/"); // Navigate to the orders page
           } catch (error) {
             console.error("Payment verification failed", error);
-            showPopup(
-              "error",
-              "Payment verification failed. Please try again."
-            );
+            showPopup("error", error.message);
           }
         },
         prefill: {
@@ -151,8 +153,7 @@ const CompleteOrder = () => {
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
     } catch (error) {
-      console.error("Payment initiation failed", error);
-      showPopup("error", "Payment initiation failed. Please try again.");
+      console.log("error in placing order", error);
     }
   };
 
@@ -205,12 +206,14 @@ const CompleteOrder = () => {
       </div>
 
       <div>
-        <button
-          onClick={handleRazorpayPayment}
-          className="bg-blue-500  text-white rounded-lg p-1"
-        >
-          Make Payment
-        </button>
+        {addresses.length > 0 && (
+          <button
+            onClick={handleRazorpayPayment}
+            className="bg-blue-500  text-white rounded-lg p-1"
+          >
+            Make Payment
+          </button>
+        )}
       </div>
     </div>
   );

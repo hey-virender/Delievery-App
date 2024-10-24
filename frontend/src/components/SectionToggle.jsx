@@ -9,8 +9,8 @@ const SectionToggle = () => {
       <div
         className={`absolute top-12 h-2 w-2 rounded-full bg-black transition-all duration-500 ease-linear ${
           section == "vegetables"
-            ? "-translate-x-20 sm:-translate-x-36 md:-translate-x-48 lg:-translate-x-60"
-            : "translate-x-20 sm:translate-x-36 md:translate-x-48 lg:translate-x-60"
+            ? "-translate-x-20 sm:-translate-x-36 md:-translate-x-48 lg:-translate-x-64 xl:-translate-x-80"
+            : "translate-x-20 sm:translate-x-36 md:translate-x-48 lg:translate-x-64 xl:translate-x-80"
         }`}
       ></div>
       <div

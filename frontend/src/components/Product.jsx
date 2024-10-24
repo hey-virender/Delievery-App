@@ -26,7 +26,7 @@ const Product = () => {
       }
     };
     fetchProduct();
-  }, [productId, product?.discount, product?.price, showPopup]);
+  }, []);
 
   return (
     product && (
