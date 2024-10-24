@@ -120,6 +120,7 @@ const Authenticate = () => {
           >
             Send Code
           </button>
+          <p>Use 1234567890</p>
           <div id="recaptcha-container"></div>
         </div>
       ) : (
@@ -142,6 +143,7 @@ const Authenticate = () => {
           >
             Verify Code
           </button>
+          <p>Use 123456</p>
         </div>
       )}
     </div>
