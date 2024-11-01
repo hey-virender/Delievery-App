@@ -8,6 +8,7 @@ export const refreshAccessToken = async () => {
     localStorage.setItem("accessToken", accessToken);
   } catch (error) {
     localStorage.removeItem("accessToken");
+    
     // handle the error based on your logic (e.g., logout the user)
   }
 };

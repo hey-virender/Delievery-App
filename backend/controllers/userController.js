@@ -25,7 +25,7 @@ export const authenticate = async (req, res) => {
     let user = await User.findOne({ firebaseId: uid });
     if (user) {
       const accessToken = generateAccessToken(user._id, user.phone);
-      const refreshToken = generateRefreshToken(user._id);
+     
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -45,14 +45,10 @@ export const authenticate = async (req, res) => {
 
       await user.save();
       const accessToken = generateAccessToken(user._id, user.phone);
-      const refreshToken = generateRefreshToken(user._id);
+
 
       // Set cookies for refresh token and send access token in response
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 604800000, // 7 days
-      });
+      
       res.json({
         accessToken,
         message: "User verified and stored successfully",
