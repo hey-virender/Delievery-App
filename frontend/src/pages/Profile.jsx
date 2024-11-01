@@ -90,7 +90,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <ProfileMenu />
     </div>
   );
 };
