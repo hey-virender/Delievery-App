@@ -1,9 +1,6 @@
 import { admin } from "../config/firebase.js"; // Import Firebase Admin
 import User from "../models/User.js";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../utils/tokenUtils.js";
+import { generateAccessToken } from "../utils/tokenUtils.js";
 
 export const authenticate = async (req, res) => {
   const { token, name } = req.body;
@@ -25,13 +22,8 @@ export const authenticate = async (req, res) => {
     let user = await User.findOne({ firebaseId: uid });
     if (user) {
       const accessToken = generateAccessToken(user._id, user.phone);
-     
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 604800000, // 7 days
-      });
+
       res.json({ accessToken, message: "User verified successfully", user });
     } else {
       if (!name) {
@@ -46,9 +38,8 @@ export const authenticate = async (req, res) => {
       await user.save();
       const accessToken = generateAccessToken(user._id, user.phone);
 
-
       // Set cookies for refresh token and send access token in response
-      
+
       res.json({
         accessToken,
         message: "User verified and stored successfully",
